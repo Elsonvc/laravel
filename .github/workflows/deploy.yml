@@ -31,5 +31,5 @@ jobs:
         application-name: laravel
         deployment-group-name: laravelproject
         deployment-config-name: CodeDeployDefault.OneAtATime
-        github-token: ${{ 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 }}
+        github-token: ${{ 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 }}
         region: us-west-2
