@@ -1,35 +1,47 @@
-name: CI/CD Pipeline
+name: Deploy to EC2
 
 on:
   push:
     branches:
-      - master
+      - master  # Trigger the workflow only when there is a push to the master branch
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Set up PHP
-      uses: shivammathur/setup-php@v2
+    - name: Set up Node.js 20
+      uses: actions/setup-node@v3
       with:
-        php-version: 8.0
-        extensions: mbstring, xml, curl, mysql
+        node-version: '20'
 
-    - name: Install dependencies
-      run: composer install --no-progress --prefer-dist --optimize-autoloader
-
-    - name: Run tests
-      run: php artisan test
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
 
     - name: Deploy to AWS CodeDeploy
-      uses: aws-actions/aws-codedeploy-github-actions@v1.0.4
+      uses: webfactory/ssh-agent@v0.5.3
       with:
-        application-name: laravel
-        deployment-group-name: laravelproject
-        deployment-config-name: CodeDeployDefault.OneAtATime
-        github-token: ${{ secrets.TOKEN_SECRET }}
-        region: us-west-2
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: Create deployment package
+      run: |
+        zip -r my-node-app.zip .  # Create a ZIP file of the application
+
+    - name: Push to S3
+      run: |
+        aws s3 cp my-node-app.zip s3://elson-laravel/app/my-node-app.zip  # Upload the ZIP file to S3
+
+    - name: Create a new deployment
+      run: |
+        aws deploy create-deployment \
+          --application-name laravel \
+          --deployment-config-name CodeDeployDefault.OneAtATime \
+          --deployment-group-name laravelproject \
+          --s3-location bucket=elson-laravel,key=app/my-node-app.zip,bundleType=zip
