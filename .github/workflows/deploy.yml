@@ -36,7 +36,7 @@ jobs:
 
     - name: Push to S3
       run: |
-        aws s3 cp my-node-app.zip s3://elson-laravel/app/my-node-app.zip --region us-east-2  # Upload the ZIP file to S3
+        aws s3 cp my-node-app.zip s3://elson-laravel/app/my-node-app.zip --region us-east-1  # Upload the ZIP file to S3
 
 
     - name: Create a new deployment
