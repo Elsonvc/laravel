@@ -101,24 +101,12 @@ jobs:
     needs: upload_to_s3
     steps:
     - name: Create a new deployment
-      id: create_deployment
       run: |
-        DEPLOYMENT_ID=$(aws deploy create-deployment \
+        aws deploy create-deployment \
           --application-name laravel \
           --deployment-config-name CodeDeployDefault.OneAtATime \
           --deployment-group-name laravelproject \
-          --s3-location bucket=elson-testing,key=app/laravel.zip,bundleType=zip \
-          --query 'deploymentId' \
-          --output text)
-        echo "DEPLOYMENT_ID=$DEPLOYMENT_ID" >> $GITHUB_ENV
-
-    - name: Check deployment status
-      run: |
-        DEPLOYMENT_STATUS=$(aws deploy get-deployment \
-          --deployment-id ${{ env.DEPLOYMENT_ID }} \
-          --query 'deploymentInfo.status' \
-          --output text)
-        echo "Deployment Status: $DEPLOYMENT_STATUS"
+          --s3-location bucket=elson-testing,key=app/laravel.zip,bundleType=zip
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
