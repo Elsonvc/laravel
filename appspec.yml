@@ -4,6 +4,10 @@ files:
   - source: /
     destination: /home/ec2-user/laravel
 hooks:
+  BeforeInstall:
+    - location: scripts/cleanup.sh
+      timeout: 300
+      runas: ec2-user
   AfterInstall:
     - location: scripts/install_dependencies.sh
       timeout: 300
