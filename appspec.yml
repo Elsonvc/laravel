@@ -3,7 +3,7 @@ os: linux
 files:
   - source: /
     destination: /home/ec2-user/laravel
- overwrite: true
+    overwrite: true
 file_exists_behavior: OVERWRITE
 hooks:
   BeforeInstall:
