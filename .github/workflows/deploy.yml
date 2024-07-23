@@ -107,13 +107,6 @@ jobs:
           --deployment-config-name CodeDeployDefault.OneAtATime \
           --deployment-group-name laravelproject \
           --s3-location bucket=elson-testing,key=app/laravel.zip,bundleType=zip
-          
-    - name: Wait for Deployment to Complete
-      run: |
-        aws deploy wait deployment-successful --deployment-id ${{ env.DEPLOYMENT_ID }}
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
     env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
