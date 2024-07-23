@@ -53,15 +53,15 @@ jobs:
         aws-region: us-east-2
 
     - name: Retrieve LARAVEL_ENV from Parameter Store
-    id: ssm
-    run: |
-      LARAVEL_ENV=$(aws ssm get-parameter --name "laravel_env" --query "Parameter.Value" --output text)
-      echo "LARAVEL_ENV=$LARAVEL_ENV" >> $GITHUB_ENV
+      id: ssm
+      run: |
+        LARAVEL_ENV=$(aws ssm get-parameter --name "laravel_env" --query "Parameter.Value" --output text)
+        echo "LARAVEL_ENV=$LARAVEL_ENV" >> $GITHUB_ENV
 
     - name: Create .env file
       run: |
         echo "APP_ENV=PROD" > .env
-        echo "LARAVEL_ENV=$LARAVEL_ENV" >> .env
+        echo "LARAVEL_ENV=${{ env.LARAVEL_ENV }}" >> .env
         # Add more environment variables as needed
 
   zip_application:
