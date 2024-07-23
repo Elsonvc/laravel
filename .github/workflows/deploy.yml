@@ -3,12 +3,11 @@ name: Deploy to Development
 on:
   push:
     branches:
-      - master  # Trigger the workflow only on push to the master branch
+      - master
 
 jobs:
   composer_development:
     runs-on: self-hosted
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -24,7 +23,6 @@ jobs:
   npm_development:
     runs-on: self-hosted
     needs: composer_development
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -40,7 +38,6 @@ jobs:
   create_env_file:
     runs-on: self-hosted
     needs: npm_development
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -66,13 +63,23 @@ jobs:
         echo "LARAVEL_ENV=${{ steps.ssm.outputs.value }}" >> .env
         # Add more environment variables as needed
 
+    - name: Upload .env file as artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: env-file
+        path: .env
+
   zip_application:
     runs-on: self-hosted
     needs: create_env_file
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
+
+    - name: Download .env file
+      uses: actions/download-artifact@v3
+      with:
+        name: env-file
 
     - name: Create deployment package
       run: |
@@ -81,7 +88,6 @@ jobs:
   upload_to_s3:
     runs-on: self-hosted
     needs: zip_application
-
     steps:
     - name: Upload ZIP to S3
       run: |
@@ -92,8 +98,7 @@ jobs:
 
   deploy_development:
     runs-on: self-hosted
-    needs: upload_to_s3 #elson-testing
-
+    needs: upload_to_s3
     steps:
     - name: Create a new deployment
       run: |
