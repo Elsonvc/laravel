@@ -45,4 +45,4 @@ jobs:
           --application-name laravel \
           --deployment-config-name CodeDeployDefault.OneAtATime \
           --deployment-group-name laravelproject \
-          --s3-location bucket=elson-laravel,key=app/my-node-app.zip,bundleType=zip
+          --s3-location bucket=elson-testing,key=app/my-node-app.zip,bundleType=zip
