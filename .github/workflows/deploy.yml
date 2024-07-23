@@ -68,7 +68,7 @@ jobs:
 
     - name: Create deployment package
       run: |
-        zip -r my-app.zip .  # Create a ZIP file of the application
+        zip -r laravel.zip .  # Create a ZIP file of the application
 
   upload_to_s3:
     runs-on: self-hosted
@@ -77,7 +77,7 @@ jobs:
     steps:
     - name: Upload ZIP to S3
       run: |
-        aws s3 cp my-app.zip s3://elson-testing/app/my-app.zip --region us-east-2
+        aws s3 cp laravel.zip s3://elson-testing/app/laravel.zip --region us-east-2
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -90,10 +90,10 @@ jobs:
     - name: Create a new deployment
       run: |
         aws deploy create-deployment \
-          --application-name my-app \
+          --application-name laravel \
           --deployment-config-name CodeDeployDefault.OneAtATime \
-          --deployment-group-name my-app-dev \
-          --s3-location bucket=elson-testing,key=app/my-app.zip,bundleType=zip
+          --deployment-group-name laravelproject \
+          --s3-location bucket=elson-testing,key=app/laravel.zip,bundleType=zip
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
