@@ -1,9 +1,9 @@
-name: Deploy to PROD
+name: Deploy to Development
 
 on:
   push:
     branches:
-      - master  # Trigger the workflow only on push to the development branch
+      - master  # Trigger the workflow only on push to the master branch
 
 jobs:
   composer_development:
@@ -37,27 +37,26 @@ jobs:
     - name: Install npm dependencies
       run: npm install
 
-create_env_file:
-  runs-on: self-hosted
-  needs: npm_development
+  create_env_file:
+    runs-on: self-hosted
+    needs: npm_development
 
-  steps:
-  - name: Checkout code
-    uses: actions/checkout@v2
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-  - name: Configure AWS credentials
-    uses: aws-actions/configure-aws-credentials@v1
-    with:
-      aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      aws-region: us-east-2
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-2
 
-  - name: Create .env file
-    run: |
-      echo "APP_ENV=PROD" > .env
-      echo "LARAVEL_ENV=$LARAVEL_ENV" >> .env
-      # Add more environment variables as needed
-
+    - name: Create .env file
+      run: |
+        echo "APP_ENV=PROD" > .env
+        echo "LARAVEL_ENV=$LARAVEL_ENV" >> .env
+        # Add more environment variables as needed
 
   zip_application:
     runs-on: self-hosted
