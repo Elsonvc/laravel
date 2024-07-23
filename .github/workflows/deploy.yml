@@ -54,14 +54,15 @@ jobs:
 
     - name: Retrieve LARAVEL_ENV from Parameter Store
       id: ssm
-      run: |
-        LARAVEL_ENV=$(aws ssm get-parameter --name "laravel_env" --query "Parameter.Value" --output text)
-        echo "LARAVEL_ENV=$LARAVEL_ENV" >> $GITHUB_ENV
+      uses: poad/get-aws-ssm-parameter@v2.0.0
+      with:
+        parameter-name: laravel_env
+        aws-region: us-east-2
 
     - name: Create .env file
       run: |
         echo "APP_ENV=PROD" > .env
-        echo "LARAVEL_ENV=${{ env.LARAVEL_ENV }}" >> .env
+        echo "LARAVEL_ENV=${{ steps.ssm.outputs.value }}" >> .env
         # Add more environment variables as needed
 
   zip_application:
