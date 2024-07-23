@@ -1,48 +1,100 @@
-name: Deploy to EC2
+name: Deploy to PROD
 
 on:
   push:
     branches:
-      - master  # Trigger the workflow only when there is a push to the master branch
+      - master  # Trigger the workflow only on push to the development branch
 
 jobs:
-  deploy:
-    runs-on: self-hosted # gitlab runner
+  composer_development:
+    runs-on: self-hosted
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Set up Node.js 20
+    - name: Set up PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.0'
+
+    - name: Install Composer dependencies
+      run: composer install
+
+  npm_development:
+    runs-on: self-hosted
+    needs: composer_development
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
         node-version: '20'
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-2
+    - name: Install npm dependencies
+      run: npm install
 
-    - name: Deploy to AWS CodeDeploy
-      uses: webfactory/ssh-agent@v0.5.3
-      with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+create_env_file:
+  runs-on: self-hosted
+  needs: npm_development
+
+  steps:
+  - name: Checkout code
+    uses: actions/checkout@v2
+
+  - name: Configure AWS credentials
+    uses: aws-actions/configure-aws-credentials@v1
+    with:
+      aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      aws-region: us-east-2
+
+  - name: Create .env file
+    run: |
+      echo "APP_ENV=PROD" > .env
+      echo "LARAVEL_ENV=$LARAVEL_ENV" >> .env
+      # Add more environment variables as needed
+
+
+  zip_application:
+    runs-on: self-hosted
+    needs: create_env_file
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
 
     - name: Create deployment package
       run: |
-        zip -r my-node-app.zip .  # Create a ZIP file of the application
+        zip -r my-app.zip .  # Create a ZIP file of the application
 
-    - name: Push to S3
+  upload_to_s3:
+    runs-on: self-hosted
+    needs: zip_application
+
+    steps:
+    - name: Upload ZIP to S3
       run: |
-        aws s3 cp my-node-app.zip s3://elson-testing/app/my-node-app.zip --region us-east-2  # Upload the ZIP file to S3
+        aws s3 cp my-app.zip s3://elson-testing/app/my-app.zip --region us-east-2
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
+  deploy_development:
+    runs-on: self-hosted
+    needs: upload_to_s3
 
+    steps:
     - name: Create a new deployment
       run: |
         aws deploy create-deployment \
-          --application-name laravel \
+          --application-name my-app \
           --deployment-config-name CodeDeployDefault.OneAtATime \
-          --deployment-group-name laravelproject \
-          --s3-location bucket=elson-testing,key=app/my-node-app.zip,bundleType=zip
+          --deployment-group-name my-app-dev \
+          --s3-location bucket=elson-testing,key=app/my-app.zip,bundleType=zip
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
