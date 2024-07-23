@@ -7,7 +7,7 @@ files:
 file_exists_behavior: OVERWRITE
 hooks:
   BeforeInstall:
-    - location: scripts/cleanup.sh
+    - location: scripts/handle_env.sh
       timeout: 300
       runas: ec2-user
   AfterInstall:
