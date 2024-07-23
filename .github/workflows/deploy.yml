@@ -90,7 +90,7 @@ jobs:
 
   deploy_development:
     runs-on: self-hosted
-    needs: upload_to_s3
+    needs: upload_to_s3 #elson-testing
 
     steps:
     - name: Create a new deployment
