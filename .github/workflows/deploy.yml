@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - master
-  workflow_dispatch :
+  workflow_dispatch:
 
 jobs:
   composer_development:
@@ -102,13 +102,38 @@ jobs:
     needs: upload_to_s3
     steps:
     - name: Create a new deployment
+      id: create_deployment
       run: |
-        aws deploy create-deployment \
+        deployment_id=$(aws deploy create-deployment \
           --application-name laravel \
           --deployment-config-name CodeDeployDefault.OneAtATime \
           --deployment-group-name laravelproject \
-          --s3-location bucket=elson-testing,key=app/laravel.zip,bundleType=zip
+          --s3-location bucket=elson-testing,key=app/laravel.zip,bundleType=zip \
+          --query 'deploymentId' --output text)
+        echo "Deployment ID: $deployment_id"
+        echo "deployment_id=$deployment_id" >> $GITHUB_ENV
 
-    env:
+    - name: Wait for deployment to complete
+      id: wait_for_deployment
+      run: |
+        deployment_id=$DEPLOYMENT_ID
+        echo "Checking deployment status..."
+        for i in {1..10}; do
+          status=$(aws deploy get-deployment --deployment-id $deployment_id --query 'deploymentInfo.status' --output text)
+          echo "Current status: $status"
+          if [ "$status" == "Succeeded" ]; then
+            echo "Deployment succeeded."
+            exit 0
+          elif [ "$status" == "Failed" ]; then
+            echo "Deployment failed."
+            exit 1
+          fi
+          echo "Waiting 30 seconds before checking again..."
+          sleep 30
+        done
+        echo "Deployment status check timed out."
+        exit 1
+      env:
+        DEPLOYMENT_ID: ${{ env.deployment_id }}
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
