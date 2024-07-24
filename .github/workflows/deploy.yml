@@ -105,9 +105,9 @@ jobs:
       id: create_deployment
       run: |
         deployment_id=$(aws deploy create-deployment \
-          --application-name laravel \
+          --application-name ${{ secrets.APPLICATION_NAME }} \
           --deployment-config-name CodeDeployDefault.OneAtATime \
-          --deployment-group-name laravelproject \
+          --deployment-group-name ${{ secrets.DEPLOYMENT_GROUP_NAME }} \
           --s3-location bucket=elson-testing,key=app/laravel.zip,bundleType=zip \
           --query 'deploymentId' --output text)
         echo "Deployment ID: $deployment_id"
@@ -134,6 +134,8 @@ jobs:
         echo "Deployment status check timed out."
         exit 1
       env:
+        application-name: ${{ secrets.APPLICATION_NAME }}
+        deployment-group-name: ${{ secrets.DEPLOYMENT_GROUP_NAME }}
         DEPLOYMENT_ID: ${{ env.deployment_id }}
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
