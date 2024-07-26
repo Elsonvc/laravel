@@ -1,8 +1,7 @@
 #!/bin/bash
 
 
-deploy_id=$(aws deploy create-deployment --application-name $codedeploy_application_name --deployment-config-name CodeDeployDefault.AllAtOnce --deployment-group-name $codedeploy_groupname --s3-location bucket=$aws_s3_bucket_name,bundleType=zip,key=$reponame/$branchname/$CI_PIPELINE_ID.zip --region us-east-2 --output text)
-
+deploy_id=$(aws deploy create-deployment --application-name laravel --deployment-config-name CodeDeployDefault.AllAtOnce --deployment-group-name laravelproject --s3-location bucket=elson-testing,bundleType=zip,key=app/laravel.zip --region us-east-2 --output text)
 while :
     do
         deploystatus=$(aws deploy get-deployment --deployment-id $deploy_id --query "deploymentInfo.[status]"  --region us-east-2 --output text)
