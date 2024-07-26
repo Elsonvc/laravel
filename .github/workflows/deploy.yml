@@ -115,6 +115,7 @@ jobs:
         echo "deployment_id=$deployment_id" >> $GITHUB_ENV
     - name: Check deployment status
       run: |
+       chmod +x deploy_status.sh
        ./deploy_status.sh ${{ steps.create_deployment.outputs.deployment_id }} us-east-2
        env:
        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
