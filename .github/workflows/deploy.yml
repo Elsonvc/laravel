@@ -85,6 +85,8 @@ jobs:
     - name: Create deployment package
       run: |
         zip -r laravel.zip .  # Create a ZIP file of the application
+    - name: List files in directory
+      run: ls -l
 
   upload_to_s3:
     runs-on: ubuntu-latest
