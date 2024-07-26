@@ -137,7 +137,7 @@ jobs:
         done
         echo "Deployment status check timed out."
         exit 1
-      env:
+    env:
         application-name: ${{ secrets.APPLICATION_NAME }}
         deployment-group-name: ${{ secrets.DEPLOYMENT_GROUP_NAME }}
         DEPLOYMENT_ID: ${{ env.deployment_id }}
