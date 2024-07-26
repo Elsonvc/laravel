@@ -87,6 +87,13 @@ jobs:
         zip -r laravel.zip .  # Create a ZIP file of the application
     - name: List files in directory
       run: ls -l
+          # Check if the laravel.zip file exists
+    - name: Verify laravel.zip exists
+      run: test -f laravel.zip && echo "laravel.zip exists" || echo "laravel.zip does not exist"
+
+      # Add a debugging step to print the environment variables
+    - name: Print environment variables
+      run: env
 
   upload_to_s3:
     runs-on: ubuntu-latest
