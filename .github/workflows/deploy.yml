@@ -8,7 +8,7 @@ on:
 
 jobs:
   composer_development:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -22,7 +22,7 @@ jobs:
       run: composer install
 
   npm_development:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: composer_development
     steps:
     - name: Checkout code
@@ -37,7 +37,7 @@ jobs:
       run: npm install
 
   create_env_file:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: npm_development
     steps:
     - name: Checkout code
@@ -71,7 +71,7 @@ jobs:
         path: .env
 
   zip_application:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: create_env_file
     steps:
     - name: Checkout code
@@ -87,7 +87,7 @@ jobs:
         zip -r laravel.zip .  # Create a ZIP file of the application
 
   upload_to_s3:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: zip_application
     steps:
     - name: Upload ZIP to S3
@@ -98,7 +98,7 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
   deploy_development:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: upload_to_s3
     steps:
     - name: Create a new deployment
