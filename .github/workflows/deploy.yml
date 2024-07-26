@@ -114,13 +114,16 @@ jobs:
         echo "Deployment ID: $deployment_id"
         echo "deployment_id=$deployment_id" >> $GITHUB_ENV
 
-    - name: Wait for deployment to complete
-      id: wait_for_deployment
+    - name: Check deployment status
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+        DEPLOYMENT_ID: ${{ steps.create_deployment.outputs.deployment_id }}
       run: |
-        deployment_id=$DEPLOYMENT_ID
         echo "Checking deployment status..."
         for i in {1..10}; do
-          status=$(aws deploy get-deployment --deployment-id $deployment_id --query 'deploymentInfo.status' --output text)
+          status=$(aws deploy get-deployment --deployment-id $DEPLOYMENT_ID --query 'deploymentInfo.status' --output text)
           echo "Current status: $status"
           if [ "$status" == "Succeeded" ]; then
             echo "Deployment succeeded."
