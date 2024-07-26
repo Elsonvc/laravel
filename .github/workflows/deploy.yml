@@ -115,27 +115,27 @@ jobs:
         echo "deployment_id=$deployment_id" >> $GITHUB_ENV
 
     - name: Check deployment status
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-      DEPLOYMENT_ID: ${{ steps.create_deployment.outputs.deployment_id }}
-      application-name: ${{ secrets.APPLICATION_NAME }}
-      deployment-group-name: ${{ secrets.DEPLOYMENT_GROUP_NAME }}
-    run: |
-     echo "Checking deployment status..."
-     for i in {1..10}; do
-      status=$(aws deploy get-deployment --deployment-id $DEPLOYMENT_ID --query 'deploymentInfo.status' --output text)
-      echo "Current status: $status"
-      if [ "$status" == "Succeeded" ]; then
-        echo "Deployment succeeded."
-        exit 0
-      elif [ "$status" == "Failed" ]; then
-        echo "Deployment failed."
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+        DEPLOYMENT_ID: ${{ steps.create_deployment.outputs.deployment_id }}
+        application-name: ${{ secrets.APPLICATION_NAME }}
+        deployment-group-name: ${{ secrets.DEPLOYMENT_GROUP_NAME }}
+      run: |
+        echo "Checking deployment status..."
+        for i in {1..10}; do
+          status=$(aws deploy get-deployment --deployment-id $DEPLOYMENT_ID --query 'deploymentInfo.status' --output text)
+          echo "Current status: $status"
+          if [ "$status" == "Succeeded" ]; then
+            echo "Deployment succeeded."
+            exit 0
+          elif [ "$status" == "Failed" ]; then
+            echo "Deployment failed."
+            exit 1
+          fi
+          echo "Waiting 30 seconds before checking again..."
+          sleep 30
+        done
+        echo "Deployment status check timed out."
         exit 1
-      fi
-      echo "Waiting 30 seconds before checking again..."
-      sleep 30
-     done
-     echo "Deployment status check timed out."
-     exit 1
