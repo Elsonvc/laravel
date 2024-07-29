@@ -113,11 +113,24 @@ jobs:
           --query 'deploymentId' --output text)
         echo "Deployment ID: $deployment_id"
         echo "deployment_id=$deployment_id" >> $GITHUB_ENV
-    - name: Check deployment status
+    - name: Check Deployment Status
       run: |
-       chmod +x scripts/deploy_status.sh
-       scripts/deploy_status.sh ${{ steps.create_deployment.outputs.deployment_id }} us-east-2
-       env:
-       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        echo "Waiting for CodeDeploy ${{ steps.create-deployment.outputs.DEPLOYMENT_ID }} to finish"
+        for i in `seq 1 ${{ env.NUMBER_OF_ATTEMPTS }}`;
+        do
+          status=`aws deploy get-deployment --deployment-id ${{ steps.create-deployment.outputs.DEPLOYMENT_ID }} | jq '.deploymentInfo.status'`
+          echo "Current Status: $status"
+          if [ "$status" == '"Succeeded"' ]; then
+            echo "${{ steps.create-deployment.outputs.DEPLOYMENT_ID }} deployed successfully"
+            exit 0
+          fi
+          if [ "$status" == '"Failed"' ]; then
+            echo "ERROR: ${{ steps.create-deployment.outputs.DEPLOYMENT_ID }} deployment failed!"
+            exit 1
+          fi
+          sleep ${{ env.SLEEP_TIME }}
+        done
+        echo "ERROR: ${{ steps.create-deployment.outputs.DEPLOYMENT_ID }} has reached maximum wait timeout!"
+        exit 1
+
 
