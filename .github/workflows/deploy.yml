@@ -113,24 +113,21 @@ jobs:
           --query 'deploymentId' --output text)
         echo "Deployment ID: $deployment_id"
         echo "deployment_id=$deployment_id" >> $GITHUB_ENV
-    - name: Check Deployment Status
-      run: |
-        echo "Waiting for CodeDeploy ${{ steps.create-deployment.outputs.DEPLOYMENT_ID }} to finish"
-        for i in `seq 1 ${{ env.NUMBER_OF_ATTEMPTS }}`;
-        do
-          status=`aws deploy get-deployment --deployment-id ${{ steps.create-deployment.outputs.DEPLOYMENT_ID }} | jq '.deploymentInfo.status'`
-          echo "Current Status: $status"
-          if [ "$status" == '"Succeeded"' ]; then
-            echo "${{ steps.create-deployment.outputs.DEPLOYMENT_ID }} deployed successfully"
-            exit 0
-          fi
-          if [ "$status" == '"Failed"' ]; then
-            echo "ERROR: ${{ steps.create-deployment.outputs.DEPLOYMENT_ID }} deployment failed!"
-            exit 1
-          fi
-          sleep ${{ env.SLEEP_TIME }}
-        done
-        echo "ERROR: ${{ steps.create-deployment.outputs.DEPLOYMENT_ID }} has reached maximum wait timeout!"
-        exit 1
+        
+        - name: Prepare AWS CodeDeploy
+        run: |
+          sed -i "1 a codedeploy_application_name='${{ secrets.CODEDEPLOY_APPLICATION }}'" scripts/aws_codedeploy.sh
+          sed -i "2 a codedeploy_groupname='${{ secrets.CODEDEPLOY_GROUPNAME }}'" scripts/aws_codedeploy.sh
+          sed -i "3 a aws_s3_bucket_name='${{ secrets.AWS_S3_BUCKET }}'" scripts/aws_codedeploy.sh
+          sed -i "4 a CI_PIPELINE_ID='${{ github.run_id }}'" scripts/aws_codedeploy.sh
+          
+        - name: CodeDeploy script
+        run: cat scripts/aws_codedeploy.sh
+          
+        - name: Run CodeDeploy script
+        run: bash scripts/aws_codedeploy.sh
 
-
+    env:
+      CODEDEPLOY_APPLICATION_NAME: ${{ secrets.CODEDEPLOY_APPLICATION }}
+      CODEDEPLOY_GROUPNAME: ${{ secrets.CODEDEPLOY_GROUP_NAME }}
+      AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
