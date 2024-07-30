@@ -96,6 +96,9 @@ jobs:
           --query 'deploymentId' --output text)
         echo "Deployment ID: $deployment_id"
         echo "deployment_id=$deployment_id" >> $GITHUB_ENV
+         
+    - name: Set executable permissions for aws_codedeploy.sh
+      run: chmod +x scripts/aws_codedeploy.sh
                 
     - name: CodeDeploy script
       run: cat scripts/aws_codedeploy.sh
