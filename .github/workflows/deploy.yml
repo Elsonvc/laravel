@@ -115,8 +115,7 @@ jobs:
           
     - name: Run CodeDeploy script
       run: bash laravel/scripts/aws_codedeploy.sh
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-        deployment_id: ${{ steps.create_deployment.outputs.deployment_id }}
+   env:
+      APPLICATION_NAME: ${{ secrets.CODEDEPLOY_APPLICATION }}
+      CODEDEPLOY_GROUPNAME: ${{ secrets.CODEDEPLOY_GROUP_NAME }}
+      AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
