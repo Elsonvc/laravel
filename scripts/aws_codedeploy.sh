@@ -1,21 +1,31 @@
 #!/bin/bash
 
-# Create a new deployment and get the deployment ID
-deployment_id=$(aws deploy create-deployment \
-  --application-name *** \
-  --deployment-config-name CodeDeployDefault.OneAtATime \
-  --deployment-group-name *** \
-  --s3-location bucket=***,key=app/***.zip,bundleType=zip \
-  --query 'deploymentId' --output text)
+deploy_id=$(aws deploy create-deployment --application-name $codedeploy_application_name --deployment-config-name CodeDeployDefault.AllAtOnce --deployment-group-name $codedeploy_groupname --s3-location bucket=$aws_s3_bucket_name,bundleType=zip,key=$CI_PIPELINE_ID.zip --region us-east-1 --output text)
 
-# Check if the deployment ID was successfully retrieved
-if [ -z "$deployment_id" ]; then
-  echo "Failed to create deployment. No deployment ID returned."
-  exit 1
+while :
+    do
+        deploystatus=$(aws deploy get-deployment --deployment-id $deploy_id --query "deploymentInfo.[status]"  --region us-east-1 --output text)
+        if [ "$deploystatus" = "Succeeded" ]
+           then
+            echo "Deployment $deploy_id is now $deploystatus"
+            echo ""
+            break
+        elif [ "$deploystatus" = "Failed" ]
+            then
+            echo "Deployment $deploy_id is now $deploystatus"
+            exit 1
+        else
+        echo "Deployment $deploy_id is now $deploystatus"
+        fi
+        sleep 30
+    done
+
+overalldeploystatus=$(aws deploy list-deployment-instances --deployment-id $deploy_id --instance-status-filter "Failed" --region us-east-1 --output text)
+
+if [ -z "$overalldeploystatus" ]
+    then
+        echo "Deploy to all instances are Successful"
+    else
+        echo "Deploy to some instances are Failed"
+        exit 1
 fi
-
-# Output the deployment ID
-echo "Deployment ID: $deployment_id"
-
-# Save the deployment ID to GitHub Actions environment file
-echo "deployment_id=$deployment_id" >> $GITHUB_ENV
