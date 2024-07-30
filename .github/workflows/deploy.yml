@@ -82,9 +82,12 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         
   deploy_development:
-    runs-on: ubuntu-latest
-    needs: zip_application
-    steps:
+   runs-on: ubuntu-latest
+   needs: zip_application
+   steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
     - name: Create a new deployment
       id: create_deployment
       run: |
@@ -96,25 +99,24 @@ jobs:
           --query 'deploymentId' --output text)
         echo "Deployment ID: $deployment_id"
         echo "deployment_id=$deployment_id" >> $GITHUB_ENV
-         
-    - name: Set executable permissions for aws_codedeploy.sh
-      run: chmod +x scripts/aws_codedeploy.sh
-                
-    - name: CodeDeploy script
-      run: cat scripts/aws_codedeploy.sh
-          
-    - name: Run CodeDeploy script
-      run: bash scripts/aws_codedeploy.sh
-
-                
-    - name: CodeDeploy script
-      run: cat scripts/aws_codedeploy.sh
-    - name: List files in scripts directory
-      run: ls -la scripts
-          
-    - name: Run CodeDeploy script
-      run: bash scripts/aws_codedeploy.sh
-env:
+      env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+         
+    - name: Set executable permissions for aws_codedeploy.sh
+      run: chmod +x laravel/scripts/aws_codedeploy.sh
+                
+    - name: List files in scripts directory
+      run: ls -la laravel/scripts
+
+    - name: Display aws_codedeploy.sh content
+      run: cat laravel/scripts/aws_codedeploy.sh
+          
+    - name: Run CodeDeploy script
+      run: bash laravel/scripts/aws_codedeploy.sh
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+        deployment_id: ${{ steps.create_deployment.outputs.deployment_id }}
