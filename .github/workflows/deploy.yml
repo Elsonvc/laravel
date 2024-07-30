@@ -106,6 +106,8 @@ jobs:
                 
     - name: CodeDeploy script
       run: cat scripts/aws_codedeploy.sh
+    - name: List files in scripts directory
+      run: ls -la scripts
           
     - name: Run CodeDeploy script
       run: bash scripts/aws_codedeploy.sh
