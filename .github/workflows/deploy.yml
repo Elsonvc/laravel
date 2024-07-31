@@ -161,7 +161,7 @@ jobs:
         run: |
           sed -i "1 a staging_codedeploy_application_name='${{ secrets.STAGING_CODEDEPLOY_APPLICATION }}'" scripts/staging_aws_codedeploy.sh
           sed -i "2 a staging_codedeploy_groupname='${{ secrets.STAGING_CODEDEPLOY_GROUP_NAME }}'" scripts/astaging_ws_codedeploy.sh
-          sed -i "3 a aws_s3_bucket_name='${{ secrets.STAGING_AWS_S3_BUCKET }}'" scripts/staging_aws_codedeploy.sh
+          sed -i "3 a staging_aws_s3_bucket_name='${{ secrets.STAGING_AWS_S3_BUCKET }}'" scripts/staging_aws_codedeploy.sh
           sed -i "4 a CI_PIPELINE_ID='${{ github.run_id }}'" scripts/staging_aws_codedeploy.sh
       - name: CodeDeploy script
         run: cat scripts/aws_codedeploy.sh

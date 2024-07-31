@@ -1,5 +1,5 @@
 #!/bin/bash
-
+#
 deploy_id=$(aws deploy create-deployment --application-name $staging_codedeploy_application_name --deployment-config-name CodeDeployDefault.AllAtOnce --deployment-group-name $staging_odedeploy_groupname --s3-location bucket=$staging_aws_s3_bucket_name,bundleType=zip,key=$CI_PIPELINE_ID.zip --region us-east-1 --output text)
 
 while :
