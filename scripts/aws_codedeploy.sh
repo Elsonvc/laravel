@@ -1,6 +1,6 @@
 #!/bin/bash
 
-deploy_id=$(aws deploy create-deployment --application-name $codedeploy_application_name --deployment-config-name CodeDeployDefault.AllAtOnce --deployment-group-name $codedeploy_groupname --s3-location bucket=$aws_s3_bucket_name,bundleType=zip,key=$CI_PIPELINE_ID.zip --region us-east-2 --output text)
+deploy_id=$(aws deploy create-deployment --application-name $codedeploy_application_name --deployment-config-name CodeDeployDefault.AllAtOnce --deployment-group-name $codedeploy_groupname --s3-location bucket=$aws_s3_bucket_name,bundleType=zip,key=laravel.zip --region us-east-2 --output text)
 
 while :
     do
