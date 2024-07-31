@@ -106,7 +106,7 @@ jobs:
 
       - name: Run CodeDeploy script
         run: bash scripts/aws_codedeploy.sh
-   env:
+    env:
       APPLICATION_NAME: ${{ secrets.CODEDEPLOY_APPLICATION }}
       CODEDEPLOY_GROUPNAME: ${{ secrets.CODEDEPLOY_GROUP_NAME }}
       AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
