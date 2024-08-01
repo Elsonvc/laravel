@@ -1,4 +1,4 @@
-name: Laravel Pipeline
+name: Laravel Pipeline Updated
 
 on:
   push:
