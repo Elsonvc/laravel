@@ -1,10 +1,10 @@
-name: Laravel Pipeline Updated
+name: Laravel Pipeline
 
 on:
   push:
     branches:
       - master
-      - demo
+      - Demo
       - staging
   workflow_dispatch:
 
@@ -143,7 +143,7 @@ jobs:
       AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
 
   deploy_demo:
-    if: github.ref == 'refs/heads/demo'
+    if: github.ref == 'refs/heads/Demo'
     runs-on: ubuntu-latest
     needs: zip_application
     steps:
