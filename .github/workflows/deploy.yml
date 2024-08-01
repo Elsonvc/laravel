@@ -55,16 +55,17 @@ jobs:
     #zip_application
 
     - name: Create deployment package
-      run: |
-        zip -r laravel.zip .  # Create a ZIP file of the application
+      run: zip -r ${{ github.run_id }}.zip . # Create a ZIP file of the current directory
+
     - name: List files in directory
-      run: ls -l
+      run: ls -l # List files to verify the ZIP file was created
+
     - name: Upload ZIP to S3
-      run: |
-        aws s3 cp laravel.zip s3://elson-testing/app/laravel.zip --region us-east-2
+      run: aws s3 cp ${{ github.run_id }}.zip s3://"${{ secrets.AWS_S3_BUCKET }}/app/${{ github.run_id }}.zip" --region ${{ secrets.AWS_REGION }}
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
 
 
     - name: Deploy Application
